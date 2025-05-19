@@ -1,0 +1,13 @@
+.journal-card {
+  border: 1px solid #ddd;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 4px;
+}
+.journal-card.important {
+  border-color: gold;
+  background: #fffbe6;
+}
+.journal-card button {
+  margin-right: 0.5rem;
+}

@@ -1,0 +1,16 @@
+.create {
+  margin: 1rem 0;
+}
+.create-form {
+  display: flex;
+  flex-direction: column;
+}
+.create-form input,
+.create-form textarea {
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+.create-form button {
+  align-self: flex-start;
+}
