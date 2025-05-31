@@ -1,100 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import JournalCard from './JournalCard';
+import { useState, useEffect } from 'react';
+import JournalList from './JournalList';
 import Create from './Create';
-import '../assets/css/App.css';
+import Toggle from './Toggle';
+import '../assets/css/App.css'; 
 
-const API_URL = 'https://jsonplaceholder.typicode.com/posts';
+const url = "https://jsonplaceholder.typicode.com/posts";
 
-function App() {
-  const [entries, setEntries] = useState([]);
+export default function App() {
+  const [journals, setJournals] = useState([]);
+  const [displayForm, setDisplayForm] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [showCreate, setShowCreate] = useState(false);
-  const [edit, setEdit] = useState(false);
-  const [editedEntry, setEditedEntry] = useState(null);
+  const [showImportant, setShowImportant] = useState(false);
+  const [editingEntry, setEditingEntry] = useState(null);
 
   useEffect(() => {
-    async function fetchEntries() {
-      setLoading(true);
-      try {
-        const res = await fetch(API_URL);
-        const data = await res.json();
-        // Initialize "important" flag locally
-        setEntries(data.map(e => ({ ...e, important: false })));
-      } catch (err) {
-        console.error(err);
-      } finally {
+    fetch(url)
+      .then(res => res.json())
+      .then(data => {
+        setJournals(data.slice(0, 10).map(item => ({ ...item, isImportant: false })));
         setLoading(false);
-      }
-    }
-    fetchEntries();
+      })
+      .catch(() => setLoading(false));
   }, []);
 
-  function addEntry(entry) {
-    setEntries(prev => [ { ...entry, important: false }, ...prev ]);
+  function handleToggle() {
+    setDisplayForm(!displayForm);
+    setEditingEntry(null); 
   }
 
-  function handleDeletedJournal(id) {
-    setEntries(prev => prev.filter(e => e.id !== id));
+  function addNewEntry(newEntry) {
+    setJournals([{ ...newEntry, isImportant: false }, ...journals]);
   }
 
-  function handleToggleImportant(id) {
-    setEntries(prev => prev.map(e => e.id === id ? { ...e, important: !e.important } : e));
+  function updateEntry(updatedEntry) {
+    setJournals(journals.map(journal => 
+      journal.id === updatedEntry.id ? { ...updatedEntry, isImportant: journal.isImportant } : journal
+    ));
+    setEditingEntry(null);
+    setDisplayForm(false);
   }
 
-  function handleEditJournal(entry) {
-    setEdit(true);
-    setEditedEntry(entry);
-    setShowCreate(true);
+  function deleteEntry(id) {
+    fetch(`${url}/${id}`, {
+      method: "DELETE",
+    })
+      .then(() => {
+        setJournals(journals.filter(journal => journal.id !== id));
+      });
   }
 
-  function updateEntry(updated) {
-    setEntries(prev => prev.map(e => e.id === updated.id ? { ...e, ...updated } : e));
-  }
-
-  function notEditing() {
-    setEdit(false);
-    setEditedEntry(null);
+  function toggleImportant(id) {
+    setJournals(journals.map(journal =>
+      journal.id === id ? { ...journal, isImportant: !journal.isImportant } : journal
+    ));
   }
 
   return (
     <div className="app">
-      <header>
-        <h1>Journal App</h1>
-        <button onClick={() => setShowCreate(show => !show)}>
-          {showCreate ? 'Close' : 'New Entry'}
-        </button>
-      </header>
-
-      {showCreate && (
-        <Create
-          url={API_URL}
-          addEntry={addEntry}
-          toggleShowCreate={() => setShowCreate(false)}
-          edit={edit}
-          editedEntry={editedEntry}
-          notEditing={notEditing}
-          updateEntry={updateEntry}
-          isLoading={setLoading}
-        />
-      )}
-
+      <h1> 📝 Journal Application 📝 </h1>
+      <Toggle 
+        onClick={handleToggle} 
+        text={displayForm ? "Hide Journal Form" : "Show Journal Form"} 
+      />
+      <Toggle 
+        onClick={() => setShowImportant(!showImportant)}
+        text={showImportant ? "Show All Journals" : "Show Important Journals"}
+      />
+      {displayForm && <Create onSubmit={addNewEntry} editingEntry={editingEntry} updateEntry={updateEntry} />}
+      <h2>Journals</h2>
       {loading ? (
-        <p>Loading...</p>
+        <h3 className='loading'>Loading...</h3>
       ) : (
-        <ul className="journal-list">
-          {entries.map(entry => (
-            <JournalCard
-              key={entry.id}
-              {...entry}
-              handleDeletedJournal={handleDeletedJournal}
-              handleEditJournal={handleEditJournal}
-              handleToggleImportant={handleToggleImportant}
-            />
-          ))}
-        </ul>
+        <JournalList 
+          journals={showImportant ? journals.filter(j => j.isImportant) : journals} 
+          onDelete={deleteEntry}
+          onEdit={setEditingEntry}
+          onToggleImportant={toggleImportant}
+        />
       )}
     </div>
   );
 }
-
-export default App;

@@ -1,16 +1,40 @@
-.create {
-  margin: 1rem 0;
-}
 .create-form {
   display: flex;
   flex-direction: column;
 }
-.create-form input,
+
+.create-form input,textarea {
+  width: 40%;
+  margin-left: 10px;
+  margin-bottom: 10px;
+  background-color: rgb(255, 255, 255);
+  border-radius: 8px;
+  margin-top: 5px;
+}
+
+.create-form input {
+  padding: 10px;
+}
+
 .create-form textarea {
-  margin-bottom: 0.5rem;
-  padding: 0.5rem;
-  font-size: 1rem;
+  padding: 10px;
+  height: 90px;
 }
+
+.create-form label {
+  margin-left: 10px;
+}
+
 .create-form button {
-  align-self: flex-start;
+  margin-left: 10px;
+  border-radius: 5px;
+  width: 150px;
+  padding: 10px;
+  margin: 10px 10px;
 }
+
+
+
+
+
+

@@ -1,76 +1,82 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import '../assets/css/Create.css';
 
-function Create({
-  url,
-  addEntry,
-  toggleShowCreate,
-  edit,
-  editedEntry,
-  notEditing,
-  updateEntry,
-  isLoading,
-}) {
-  const [newEntry, setNewEntry] = useState({ title: '', body: '' });
+
+export default function Create({ onSubmit, editingEntry, updateEntry }) {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [invalidInput, setInvalidInput] = useState("");
 
   useEffect(() => {
-    if (edit && editedEntry) {
-      setNewEntry({ title: editedEntry.title, body: editedEntry.body });
+    if (editingEntry) {
+      setTitle(editingEntry.title);
+      setBody(editingEntry.body);
     } else {
-      setNewEntry({ title: '', body: '' });
+      setTitle("");
+      setBody("");
     }
-  }, [edit, editedEntry]);
+  }, [editingEntry]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setNewEntry(prev => ({ ...prev, [name]: value }));
-  };
+  function handleSubmit(event) {
+    event.preventDefault();
+    if (!title || !body) {
+      setInvalidInput("Both input fields are required!");
+      return;
+    }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    isLoading(true);
-    try {
-      const res = await fetch(edit ? `${url}/${editedEntry.id}` : url, {
-        method: edit ? 'PATCH' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newEntry)
+    const entry = {
+      title,
+      body,
+      userId: 1,
+      ...(editingEntry && { id: editingEntry.id })
+    };
+
+    const request = editingEntry ? 
+      fetch(`https://jsonplaceholder.typicode.com/posts/${editingEntry.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry),
+      }) :
+      fetch("https://jsonplaceholder.typicode.com/posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry),
       });
-      if (!res.ok) throw new Error('Failed to save entry');
-      const data = await res.json();
-      if (edit) updateEntry({ ...editedEntry, ...data });
-      else addEntry(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      toggleShowCreate();
-      notEditing();
-      isLoading(false);
-    }
-  };
+
+    request
+      .then(res => res.json())
+      .then(data => {
+        if (editingEntry) {
+          updateEntry({ ...data, id: editingEntry.id });
+        } else {
+          onSubmit(data);
+
+        }
+        setTitle("");
+        setBody("");
+        setInvalidInput("");
+      });
+  }
 
   return (
-    <div className="create">
-      <h2>{edit ? 'Edit Entry' : 'New Journal Entry'}</h2>
-      <form onSubmit={handleSubmit} className="create-form">
-        <input
-          type="text"
-          name="title"
-          value={newEntry.title}
-          onChange={handleChange}
-          placeholder="Title"
-          required
-        />
-        <textarea
-          name="body"
-          value={newEntry.body}
-          onChange={handleChange}
-          placeholder="Write your thoughts..."
-          required
-        />
-        <button type="submit">{edit ? 'Update' : 'Add Entry'}</button>
-      </form>
-    </div>
+    <form className='create-form' onSubmit={handleSubmit}>
+      {invalidInput && <h3 style={{ color: "red", marginLeft: "10px" }}>{invalidInput}</h3>}
+      <label htmlFor='title'>Title</label>
+      <input 
+        type='text' 
+        id='title'
+        placeholder='Title' 
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+      />
+      <label htmlFor='body'>Body</label>
+      <textarea 
+        id='body'
+        placeholder='Body' 
+        value={body}
+        onChange={e => setBody(e.target.value)}
+      />
+      <button type='submit'>{editingEntry ? "Update" : "Submit"}</button>
+    </form>
   );
 }
-
-export default Create;
