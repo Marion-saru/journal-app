@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://Marion-saru.github.io/journal-app",
+  "homepage": "https://Marion-saru.github.io/journal-marion-maghanga",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

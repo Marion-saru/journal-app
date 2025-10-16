@@ -3,7 +3,7 @@
 
 This is a simple and minimalistic journaling app built with React. Users can create entries, edit or delete what you’ve outgrown, and pin the ones that stick with you. 
 
-[Live app](https://Marion-saru.github.io/journal-app/ "Click here to interact with my journal app")
+[Live app](https://Marion-saru.github.io/journal-marion-maghanga/ "Click here to interact with my journal app")
 
 ## Features
 
